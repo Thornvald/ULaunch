@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-neu-bg text-slate-700 min-h-screen font-sans overflow-hidden select-none;
+  }
+}
+
+/* Custom Scrollbar for Neumorphic feel */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e0e5ec;
+  border-radius: 10px;
+  box-shadow: inset 3px 3px 5px rgba(163, 177, 198, 0.3), inset -3px -3px 5px rgba(255, 255, 255, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d9e6;
+  border-radius: 10px;
+  box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.5), -2px -2px 4px rgba(255, 255, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c3ccdb;
+}
+
+/* High-FPS Neumorphic Button via GPU Acceleration */
+.neu-button {
+  background-color: #e0e5ec;
+  border-radius: 16px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
+  z-index: 1;
+}
+
+.neu-button::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  box-shadow: 4px 4px 8px rgb(163,177,198,0.6), -4px -4px 8px rgba(255,255,255, 0.5);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.neu-button::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  box-shadow: inset 6px 6px 12px #bcbcbc, inset -6px -6px 12px #ffffff;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.neu-button:hover {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.neu-button:hover::before { opacity: 1; }
+
+.neu-button:active {
+  transform: translateY(3px) scale(0.98);
+  box-shadow: none;
+  transition-duration: 0.7s;
+}
+.neu-button:active::before {
+  opacity: 0;
+  transition-duration: 0.2s;
+}
+.neu-button:active::after { opacity: 1; }
+.neu-button:focus { outline: none; }
+
+/* High-FPS Neumorphic Cards via GPU Acceleration */
+.neu-card {
+  background-color: #e0e5ec;
+  border-radius: 24px;
+  position: relative;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
+  z-index: 1;
+}
+
+.neu-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  box-shadow: 4px 4px 8px rgb(163,177,198,0.6), -4px -4px 8px rgba(255,255,255, 0.5);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.neu-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  box-shadow: inset 6px 6px 12px #bcbcbc, inset -6px -6px 12px #ffffff;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.neu-card:hover {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.neu-card:hover::before { opacity: 1; }
+
+.neu-card.neu-card-interactive:active {
+  transform: translateY(3px) scale(0.98);
+  box-shadow: none;
+  transition-duration: 0.7s;
+}
+.neu-card.neu-card-interactive:active::before {
+  opacity: 0;
+  transition-duration: 0.2s;
+}
+.neu-card.neu-card-interactive:active::after {
+  opacity: 1;
+}
+
+/* High-FPS Neumorphic Round Buttons via GPU Acceleration */
+.neu-button-round {
+  background-color: #e0e5ec;
+  border-radius: 9999px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 4px 4px 8px rgb(163,177,198,0.6), -4px -4px 8px rgba(255,255,255, 0.5);
+  z-index: 1;
+}
+
+.neu-button-round::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  box-shadow: 2px 2px 4px rgb(163,177,198,0.6), -2px -2px 4px rgba(255,255,255, 0.5);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.neu-button-round::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  box-shadow: inset 3px 3px 6px #bcbcbc, inset -3px -3px 6px #ffffff;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.neu-button-round:hover {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.neu-button-round:hover::before { opacity: 1; }
+
+.neu-button-round:active {
+  transform: translateY(2px) scale(0.95);
+  box-shadow: none;
+  transition-duration: 0.7s;
+}
+.neu-button-round:active::before {
+  opacity: 0;
+  transition-duration: 0.2s;
+}
+.neu-button-round:active::after { opacity: 1; }
+.neu-button-round:focus { outline: none; }
