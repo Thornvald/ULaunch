@@ -3,7 +3,7 @@ import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { load, Store } from "@tauri-apps/plugin-store";
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { FolderPlus, FilePlus, Play, Settings, RefreshCw, X, Minus, Square, Code } from "lucide-react";
+import { FolderPlus, FilePlus, Play, Settings, RefreshCw, X, Minus, Square, Code, FolderOpen } from "lucide-react";
 
 interface ProjectInfo {
   name: string;
@@ -252,6 +252,16 @@ function App() {
                         <div className="mt-4 pt-4 border-t border-slate-300/30 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all duration-700 ease-smooth translate-y-2 group-hover:translate-y-0">
                           <span className="text-sm font-medium text-blue-600">Launch Project</span>
                           <div className="flex items-center gap-1">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                invoke("open_in_explorer", { path: proj.path });
+                              }}
+                              className="w-8 h-8 neu-button-round flex items-center justify-center text-slate-500 hover:text-green-600 transition-colors"
+                              title="Open Project Folder"
+                            >
+                              <FolderOpen className="w-4 h-4" />
+                            </button>
                             {proj.sln_path && (
                               <button 
                                 onClick={(e) => {
