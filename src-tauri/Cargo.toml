@@ -1,6 +1,6 @@
 [package]
 name = "ulaunch"
-version = "0.1.0"
+version = "1.35.0"
 description = "ULaunch Epic Games Launcher Alternative"
 authors = ["DevUser"]
 edition = "2021"

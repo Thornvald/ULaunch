@@ -112,6 +112,15 @@ fn launch_engine(path: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn open_in_explorer(path: String) -> Result<(), String> {
+    if let Some(parent) = Path::new(&path).parent() {
+        open::that(parent).map_err(|e| e.to_string())
+    } else {
+        Err("Could not get parent directory".into())
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -126,7 +135,8 @@ pub fn run() {
             detect_engines,
             launch_uproject,
             launch_sln,
-            launch_engine
+            launch_engine,
+            open_in_explorer
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
