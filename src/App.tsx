@@ -20,6 +20,8 @@ interface EngineInfo {
 function App() {
   const [projects, setProjects] = useState<ProjectInfo[]>([]);
   const [engines, setEngines] = useState<EngineInfo[]>([]);
+  const [customEngines, setCustomEngines] = useState<EngineInfo[]>([]);
+  const [defaultEnginePath, setDefaultEnginePath] = useState<string | null>(null);
   const [scanPaths, setScanPaths] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'projects' | 'engines'>('projects');
@@ -31,13 +33,23 @@ function App() {
 
   async function initApp() {
     try {
-      const appStore = await load("store.json", { autoSave: false, defaults: { scanPaths: [] } });
+      const appStore = await load("store.json", { autoSave: false, defaults: { scanPaths: [], customEngines: [], defaultEnginePath: null } });
       setStore(appStore);
 
       const savedPaths = await appStore.get<string[]>("scanPaths");
       if (savedPaths && savedPaths.length > 0) {
         setScanPaths(savedPaths);
         await refreshProjects(savedPaths);
+      }
+
+      const savedCustomEngines = await appStore.get<EngineInfo[]>("customEngines");
+      if (savedCustomEngines) {
+        setCustomEngines(savedCustomEngines);
+      }
+
+      const savedDefaultEngine = await appStore.get<string>("defaultEnginePath");
+      if (savedDefaultEngine) {
+        setDefaultEnginePath(savedDefaultEngine);
       }
       
       const detectedEngines = await invoke<EngineInfo[]>("detect_engines");
@@ -90,9 +102,44 @@ function App() {
 
   async function launchProject(path: string) {
     try {
-      await invoke("launch_uproject", { path });
+      await invoke("launch_uproject", { path, enginePath: defaultEnginePath });
     } catch (e) {
       console.error("Failed to launch project:", e);
+    }
+  }
+
+  async function handleAddCustomEngine() {
+    const selected = await open({
+      multiple: false,
+      filters: [{ name: "Executable", extensions: ["exe"] }]
+    });
+    if (selected && store && typeof selected === 'string') {
+      const parts = selected.split('\\');
+      let version = "Custom";
+      for (const part of parts) {
+        if (part.startsWith("UE_")) {
+          version = part.replace("UE_", "");
+          break;
+        }
+      }
+      if (version === "Custom") {
+        const parent = parts[parts.length - 2];
+        if (parent) version = parent;
+      }
+      
+      const newEngine: EngineInfo = { version, path: selected };
+      const updated = [...customEngines, newEngine];
+      setCustomEngines(updated);
+      await store.set("customEngines", updated);
+      await store.save();
+    }
+  }
+
+  async function handleSetDefaultEngine(path: string | null) {
+    if (store) {
+      setDefaultEnginePath(path);
+      await store.set("defaultEnginePath", path);
+      await store.save();
     }
   }
 
@@ -113,6 +160,7 @@ function App() {
     await refreshProjects(updated);
   }
 
+  const allEngines = [...engines, ...customEngines];
   const appWindow = getCurrentWindow();
 
   return (
@@ -157,13 +205,13 @@ function App() {
           <nav className="flex flex-col gap-4 flex-1">
             <button 
               onClick={() => setActiveTab('projects')}
-              className={`px-4 py-3 text-left font-medium ${activeTab === 'projects' ? 'neu-button text-blue-600' : 'neu-button'}`}
+              className={`px-4 py-3 text-left font-medium transition-colors duration-500 ${activeTab === 'projects' ? 'neu-button text-blue-600 shadow-neu-pressed' : 'neu-button'}`}
             >
               My Projects
             </button>
             <button 
               onClick={() => setActiveTab('engines')}
-              className={`px-4 py-3 text-left font-medium ${activeTab === 'engines' ? 'neu-button text-blue-600' : 'neu-button'}`}
+              className={`px-4 py-3 text-left font-medium transition-colors duration-500 ${activeTab === 'engines' ? 'neu-button text-blue-600 shadow-neu-pressed' : 'neu-button'}`}
             >
               Engine Versions
             </button>
@@ -193,6 +241,22 @@ function App() {
               </button>
             </div>
           </nav>
+          
+          <div className="mt-auto px-4 flex flex-col gap-2">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Default Engine</span>
+            {defaultEnginePath ? (
+               <div className="flex flex-col">
+                 <span className="text-sm font-bold text-blue-600 truncate" title={defaultEnginePath}>
+                   {allEngines.find(e => e.path === defaultEnginePath)?.version || 'Custom'}
+                 </span>
+                 <span className="text-[10px] text-slate-500 truncate" title={defaultEnginePath}>
+                   {defaultEnginePath.split('\\').pop()}
+                 </span>
+               </div>
+            ) : (
+               <span className="text-sm font-medium text-slate-500">System Default</span>
+            )}
+          </div>
         </aside>
 
         {/* Main Content */}
@@ -290,43 +354,59 @@ function App() {
           {activeTab === 'engines' && (
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold text-slate-800">Detected Engines</h2>
-                <button onClick={() => initApp()} className="p-2 w-10 h-10 neu-button-round flex items-center justify-center text-slate-600">
-                  <RefreshCw className="w-5 h-5" />
-                </button>
+                <h2 className="text-3xl font-bold text-slate-800">Engines</h2>
+                <div className="flex items-center gap-4">
+                  <button onClick={handleAddCustomEngine} className="px-4 py-2 neu-button text-sm font-medium text-slate-700 transition-all duration-500 hover:text-blue-600 active:scale-95">
+                    + Add Engine
+                  </button>
+                  <button onClick={() => initApp()} className="p-2 w-10 h-10 neu-button-round flex items-center justify-center text-slate-600">
+                    <RefreshCw className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
-              {engines.length === 0 ? (
+              {allEngines.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
                   <Settings className="w-16 h-16 mb-4 opacity-50" />
-                  <p>No Unreal Engine installations detected in default paths.</p>
+                  <p>No Unreal Engine installations detected.</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
-                  {engines.map((eng, idx) => (
-                    <div 
-                      key={idx}
-                      className="group flex items-center justify-between p-6 neu-card"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl shadow-neu-pressed flex items-center justify-center text-2xl font-bold text-blue-600 transition-transform duration-500 ease-smooth group-hover:scale-105">
-                          {eng.version}
+                  {allEngines.map((eng, idx) => {
+                    const isDefault = defaultEnginePath === eng.path;
+                    return (
+                      <div 
+                        key={idx}
+                        className="group flex items-center justify-between p-6 neu-card transition-all duration-500 ease-smooth"
+                      >
+                        <div className="flex items-center gap-6">
+                          <div className="text-4xl font-extrabold text-slate-300 transition-colors duration-500 ease-smooth group-hover:text-blue-500 select-none w-20 text-center">
+                            {eng.version}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-xl text-slate-700 transition-colors duration-500 group-hover:text-slate-900">Unreal Engine {eng.version}</h3>
+                            <p className="text-sm text-slate-500">{eng.path}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-bold text-xl transition-colors duration-500 group-hover:text-blue-600">Unreal Engine {eng.version}</h3>
-                          <p className="text-sm text-slate-500">{eng.path}</p>
+                        
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={() => handleSetDefaultEngine(isDefault ? null : eng.path)}
+                            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-500 ease-smooth ${isDefault ? 'shadow-neu-pressed bg-neu-bg text-blue-600' : 'neu-button text-slate-500 hover:text-slate-800'}`}
+                          >
+                            {isDefault ? 'Default' : 'Set Default'}
+                          </button>
+                          <button 
+                            onClick={() => launchEngine(eng.path)}
+                            className="flex items-center gap-2 px-6 py-3 neu-button text-slate-600 font-semibold transition-all duration-500 ease-smooth hover:text-blue-600 hover:gap-4 active:scale-95 group/btn"
+                          >
+                            <Play className="w-5 h-5 fill-current text-slate-400 group-hover/btn:text-blue-600 transition-colors duration-500" />
+                            Launch Engine
+                          </button>
                         </div>
                       </div>
-                      
-                      <button 
-                        onClick={() => launchEngine(eng.path)}
-                        className="flex items-center gap-2 px-6 py-3 neu-button text-blue-600 font-semibold hover:gap-4"
-                      >
-                        <Play className="w-5 h-5 fill-current" />
-                        Launch Engine
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
