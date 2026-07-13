@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import { EnginesView } from "./components/EnginesView";
 import { ErrorBanner } from "./components/ErrorBanner";
@@ -12,6 +13,28 @@ import type { ActiveTab } from "./types";
 function App() {
 	const [activeTab, setActiveTab] = useState<ActiveTab>("projects");
 	const data = useULaunchData();
+	const ready = data.ready;
+	const reportFailure = data.reportFailure;
+
+	useEffect(() => {
+		if (!ready) {
+			return;
+		}
+
+		let secondFrame = 0;
+		const firstFrame = requestAnimationFrame(() => {
+			secondFrame = requestAnimationFrame(() => {
+				void getCurrentWindow().show().catch((errorValue: unknown) => (
+					reportFailure("Could not reveal application window", errorValue)
+				));
+			});
+		});
+
+		return () => {
+			cancelAnimationFrame(firstFrame);
+			cancelAnimationFrame(secondFrame);
+		};
+	}, [ready, reportFailure]);
 
 	return (
 		<div className="flex h-screen flex-col overflow-hidden rounded-xl border border-neu-border bg-neu-bg font-sans text-neu-text">

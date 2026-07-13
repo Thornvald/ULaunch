@@ -19,8 +19,10 @@ import {
 } from "../services/ulaunch";
 import type { EngineInfo, ProjectInfo } from "../types";
 import { engineVersion, pathKey, uniqueEngines, uniquePaths } from "../utils/paths";
+import { normalizeCachedProjects } from "../utils/projects";
 
 const STORE_DEFAULTS = {
+	projects: [] as ProjectInfo[],
 	scanPaths: [] as string[],
 	customEngines: [] as EngineInfo[],
 	defaultEnginePath: null as string | null,
@@ -47,6 +49,7 @@ export function useULaunchData() {
 	const [scanPaths, setScanPaths] = useState<string[]>([]);
 	const [projectImages, setProjectImages] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
+	const [ready, setReady] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [store, setStore] = useState<Store | null>(null);
 	const scanRequest = useRef(0);
@@ -56,14 +59,36 @@ export function useULaunchData() {
 		setErrorMessage(await reportError(context, errorValue));
 	}, []);
 
-	const refreshProjects = useCallback(async (paths: string[]) => {
+	const refreshProjects = useCallback(async (paths: string[], projectStore: Store | null = store) => {
 		const request = ++scanRequest.current;
+		if (paths.length === 0) {
+			setProjects([]);
+			setErrorMessage(null);
+			setLoading(false);
+			if (projectStore) {
+				try {
+					await persist(projectStore, "projects", []);
+				} catch (cacheError) {
+					await reportWarning(`Could not clear cached projects: ${String(cacheError)}`);
+				}
+			}
+			return;
+		}
+
 		setLoading(true);
 		try {
 			const foundProjects = await scanDirectories(paths);
-			if (request === scanRequest.current) {
-				setProjects(foundProjects);
-				setErrorMessage(null);
+			if (request !== scanRequest.current) {
+				return;
+			}
+			setProjects(foundProjects);
+			setErrorMessage(null);
+			if (projectStore) {
+				try {
+					await persist(projectStore, "projects", foundProjects);
+				} catch (cacheError) {
+					await reportWarning(`Could not cache discovered projects: ${String(cacheError)}`);
+				}
 			}
 			await reportInfo(`Loaded ${foundProjects.length} project(s)`);
 		} catch (errorValue) {
@@ -75,22 +100,37 @@ export function useULaunchData() {
 				setLoading(false);
 			}
 		}
-	}, [showError]);
+	}, [showError, store]);
 
 	const initialize = useCallback(async () => {
 		try {
 			const appStore = await load("store.json", { autoSave: false, defaults: STORE_DEFAULTS });
 			setStore(appStore);
 
-			const [savedPaths, savedCustomEngines, savedDefaultEngine, savedProjectImages, detectedEngines] = await Promise.all([
+			const [savedProjects, savedPaths, savedCustomEngines, savedDefaultEngine, savedProjectImages] = await Promise.all([
+				appStore.get<unknown>("projects"),
 				appStore.get<string[]>("scanPaths"),
 				appStore.get<EngineInfo[]>("customEngines"),
 				appStore.get<string | null>("defaultEnginePath"),
 				appStore.get<Record<string, string>>("projectImages"),
-				detectEngines(),
 			]);
 			const normalizedPaths = uniquePaths(savedPaths ?? []);
+			const cachedProjects = normalizedPaths.length > 0
+				? normalizeCachedProjects(savedProjects)
+				: [];
 			const normalizedCustomEngines = uniqueEngines(savedCustomEngines ?? []);
+			setProjects(cachedProjects);
+			setScanPaths(normalizedPaths);
+			setCustomEngines(normalizedCustomEngines);
+			setDefaultEnginePath(savedDefaultEngine ?? null);
+			setProjectImages(savedProjectImages ?? {});
+			setErrorMessage(null);
+			setReady(true);
+			if (cachedProjects.length > 0) {
+				await reportInfo(`Restored ${cachedProjects.length} cached project(s)`);
+			}
+
+			const detectedEngines = await detectEngines();
 			const normalizedDetectedEngines = uniqueEngines(detectedEngines);
 			const availableEngines = uniqueEngines([
 				...normalizedDetectedEngines,
@@ -104,20 +144,14 @@ export function useULaunchData() {
 				await persist(appStore, "defaultEnginePath", null);
 				await reportWarning(`Cleared unavailable default engine '${savedDefaultEngine}'`);
 			}
-			setScanPaths(normalizedPaths);
-			setCustomEngines(normalizedCustomEngines);
 			setDefaultEnginePath(validDefaultEngine);
-			setProjectImages(savedProjectImages ?? {});
 			setEngines(normalizedDetectedEngines);
-			setErrorMessage(null);
 
-			if (normalizedPaths.length > 0) {
-				await refreshProjects(normalizedPaths);
-			} else {
-				setProjects([]);
-			}
+			await refreshProjects(normalizedPaths, appStore);
 		} catch (errorValue) {
 			await showError("Application initialization failed", errorValue);
+		} finally {
+			setReady(true);
 		}
 	}, [refreshProjects, showError]);
 
@@ -329,6 +363,7 @@ export function useULaunchData() {
 		defaultEnginePath,
 		scanPaths,
 		loading,
+		ready,
 		errorMessage,
 		clearError: () => setErrorMessage(null),
 		reportFailure: showError,
