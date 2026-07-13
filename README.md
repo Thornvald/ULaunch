@@ -11,6 +11,7 @@ ULaunch is a lightweight Unreal Engine launcher built with Tauri, React, TypeScr
 - Launch Unreal projects directly from the app
 - Open matching `.sln` files when they exist
 - Show project screenshots from `Saved/AutoScreenshot.png`
+- Set a custom image for each project, with reset support and automatic screenshot fallback
 
 ## Stack
 
@@ -19,32 +20,32 @@ ULaunch is a lightweight Unreal Engine launcher built with Tauri, React, TypeScr
 - TypeScript
 - Rust
 - Tailwind CSS
-- Bun for package management and scripts
+- npm for package management and scripts
 
 ## Getting started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/)
+- Node.js 24 and npm
 - Rust toolchain
 - Windows machine with Unreal Engine projects or installs to manage
 
 ### Install dependencies
 
 ```bash
-bun install
+npm install
 ```
 
 ### Run in development
 
 ```bash
-bun run tauri dev
+npm run tauri dev
 ```
 
 ### Build the desktop app
 
 ```bash
-bun run tauri build
+npm run tauri build
 ```
 
 ## Release build
@@ -57,10 +58,11 @@ Windows release artifacts are written to `src-tauri/target/release/bundle/`.
 ## Project structure
 
 - `src/` - React frontend
-- `src-tauri/src/` - Rust backend commands and app bootstrap
+- `src-tauri/src/` - Rust discovery, validation, launch commands, and app bootstrap
 - `src-tauri/tauri.conf.json` - Tauri app configuration
 
 ## Notes
 
 - Saved scan paths are persisted with the Tauri store plugin
 - Engine detection currently checks common Epic Games install directories on Windows
+- Logs are stored in the operating system application log directory

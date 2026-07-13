@@ -1,32 +1,26 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        neu: {
-          bg: '#e0e5ec',
-          light: '#ffffff',
-          dark: '#a3b1c6'
-        }
-      },
-      boxShadow: {
-        'neu-flat': '9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5)',
-        'neu-pressed': 'inset 6px 6px 10px 0 rgba(163, 177, 198, 0.5), inset -6px -6px 10px 0 rgba(255, 255, 255, 0.5)',
-        'neu-sm': '4px 4px 8px rgb(163,177,198,0.6), -4px -4px 8px rgba(255,255,255, 0.5)',
-      },
-      transitionDuration: {
-        '500': '500ms',
-        '700': '700ms',
-      },
-      transitionTimingFunction: {
-        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
-        'heavy': 'cubic-bezier(0.22, 1, 0.36, 1)',
-      }
-    },
-  },
-  plugins: [],
-}
+	content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+	theme: {
+		extend: {
+			colors: {
+				neu: {
+					bg: "#111111",
+					surface: "#161616",
+					elevated: "#1d1d1d",
+					inset: "#0c0c0c",
+					border: "#2b2b2b",
+					text: "#e8e8e8",
+					muted: "#929292",
+					accent: "#d0d0d0",
+				},
+			},
+			boxShadow: {
+				"neu-flat": "8px 8px 18px rgba(0,0,0,0.55), -3px -3px 8px rgba(255,255,255,0.025)",
+				"neu-pressed": "inset 6px 6px 12px rgba(0,0,0,0.62), inset -2px -2px 6px rgba(255,255,255,0.025)",
+				"neu-sm": "3px 3px 8px rgba(0,0,0,0.55), -2px -2px 5px rgba(255,255,255,0.025)",
+			},
+		},
+	},
+	plugins: [],
+};

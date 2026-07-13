@@ -3,184 +3,223 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-neu-bg text-slate-700 min-h-screen font-sans overflow-hidden select-none;
-  }
+	:root {
+		color-scheme: dark;
+		font-synthesis: none;
+		text-rendering: optimizeLegibility;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	body {
+		@apply min-h-screen select-none overflow-hidden bg-[#080808] font-sans text-neu-text;
+		margin: 0;
+	}
+
+	button:focus-visible,
+	[role="button"]:focus-visible {
+			outline: 2px solid #bcbcbc;
+		outline-offset: 2px;
+	}
 }
 
-/* Custom Scrollbar for Neumorphic feel */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+	width: 10px;
+	height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #e0e5ec;
-  border-radius: 10px;
-  box-shadow: inset 3px 3px 5px rgba(163, 177, 198, 0.3), inset -3px -3px 5px rgba(255, 255, 255, 0.3);
+	background: #0a0a0a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d9e6;
-  border-radius: 10px;
-  box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.5), -2px -2px 4px rgba(255, 255, 255, 0.5);
+	border: 2px solid #0a0a0a;
+	border-radius: 9999px;
+	background: #363636;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #c3ccdb;
+	background: #4b4b4b;
 }
 
-/* High-FPS Neumorphic Button via GPU Acceleration */
+.neu-button,
+.neu-button-round,
+.neu-card {
+	position: relative;
+	z-index: 1;
+	border: 1px solid #292929;
+	background: #191919;
+	box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.58), -2px -2px 7px rgba(255, 255, 255, 0.025);
+	transition: transform 135ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 .neu-button {
-  background-color: #e0e5ec;
-  border-radius: 16px;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.2);
-  position: relative;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
-  z-index: 1;
+	isolation: isolate;
+	overflow: hidden;
+	border-radius: 16px;
+	cursor: pointer;
+	transform-origin: center;
+	transition: transform 210ms cubic-bezier(0.16, 1.55, 0.3, 1);
 }
 
-.neu-button::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border-radius: inherit;
-  box-shadow: 4px 4px 8px rgb(163,177,198,0.6), -4px -4px 8px rgba(255,255,255, 0.5);
-  opacity: 0;
-  z-index: -1;
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+.neu-button-round {
+	isolation: isolate;
+	overflow: hidden;
+	border-radius: 9999px;
+	cursor: pointer;
+	transform-origin: center;
+	transition: transform 210ms cubic-bezier(0.16, 1.65, 0.3, 1);
 }
 
-.neu-button::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border-radius: inherit;
-  box-shadow: inset 6px 6px 12px #bcbcbc, inset -6px -6px 12px #ffffff;
-  opacity: 0;
-  z-index: -1;
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+.neu-button,
+.neu-button-round {
+	border-color: transparent;
+	background:
+		radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.026), transparent 58%),
+		#141414;
+	box-shadow:
+		17px 20px 42px rgba(0, 0, 0, 0.74),
+		-15px -15px 38px rgba(255, 255, 255, 0.035);
+}
+
+.neu-button::after,
+.neu-button-round::after {
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	border-radius: inherit;
+	background: radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.045), transparent 58%);
+	content: "";
+	opacity: 0.5;
+	pointer-events: none;
+	transition: opacity 110ms linear;
+}
+
+.neu-card {
+	border-radius: 16px;
 }
 
 .neu-button:hover {
-  transform: translateY(1px);
-  box-shadow: none;
+	border-color: transparent;
+	background:
+		radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.032), transparent 60%),
+		#151515;
+	box-shadow:
+		20px 24px 48px rgba(0, 0, 0, 0.78),
+		-17px -17px 42px rgba(255, 255, 255, 0.042);
+	transform: translate3d(0, -3px, 0) scale(1.025);
 }
-.neu-button:hover::before { opacity: 1; }
+
+.neu-button:hover::after,
+.neu-button-round:hover::after {
+	opacity: 1;
+}
 
 .neu-button:active {
-  transform: translateY(3px) scale(0.98);
-  box-shadow: none;
-  transition-duration: 0.7s;
-}
-.neu-button:active::before {
-  opacity: 0;
-  transition-duration: 0.2s;
-}
-.neu-button:active::after { opacity: 1; }
-.neu-button:focus { outline: none; }
-
-/* High-FPS Neumorphic Cards via GPU Acceleration */
-.neu-card {
-  background-color: #e0e5ec;
-  border-radius: 24px;
-  position: relative;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
-  z-index: 1;
-}
-
-.neu-card::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border-radius: inherit;
-  box-shadow: 4px 4px 8px rgb(163,177,198,0.6), -4px -4px 8px rgba(255,255,255, 0.5);
-  opacity: 0;
-  z-index: -1;
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.neu-card::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border-radius: inherit;
-  box-shadow: inset 6px 6px 12px #bcbcbc, inset -6px -6px 12px #ffffff;
-  opacity: 0;
-  z-index: -1;
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.neu-card:hover {
-  transform: translateY(1px);
-  box-shadow: none;
-}
-.neu-card:hover::before { opacity: 1; }
-
-.neu-card.neu-card-interactive:active {
-  transform: translateY(3px) scale(0.98);
-  box-shadow: none;
-  transition-duration: 0.7s;
-}
-.neu-card.neu-card-interactive:active::before {
-  opacity: 0;
-  transition-duration: 0.2s;
-}
-.neu-card.neu-card-interactive:active::after {
-  opacity: 1;
-}
-
-/* High-FPS Neumorphic Round Buttons via GPU Acceleration */
-.neu-button-round {
-  background-color: #e0e5ec;
-  border-radius: 9999px;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.2);
-  position: relative;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 4px 4px 8px rgb(163,177,198,0.6), -4px -4px 8px rgba(255,255,255, 0.5);
-  z-index: 1;
-}
-
-.neu-button-round::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border-radius: inherit;
-  box-shadow: 2px 2px 4px rgb(163,177,198,0.6), -2px -2px 4px rgba(255,255,255, 0.5);
-  opacity: 0;
-  z-index: -1;
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.neu-button-round::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border-radius: inherit;
-  box-shadow: inset 3px 3px 6px #bcbcbc, inset -3px -3px 6px #ffffff;
-  opacity: 0;
-  z-index: -1;
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+	background: #121212;
+	box-shadow:
+		inset 12px 14px 28px rgba(0, 0, 0, 0.68),
+		inset -10px -10px 25px rgba(255, 255, 255, 0.028);
+	transform: translate3d(0, 3px, 0) scale(0.93);
+	transition-duration: 55ms;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.9, 0.4);
 }
 
 .neu-button-round:hover {
-  transform: translateY(1px);
-  box-shadow: none;
+	border-color: transparent;
+	background:
+		radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.032), transparent 60%),
+		#151515;
+	box-shadow:
+		15px 18px 34px rgba(0, 0, 0, 0.78),
+		-13px -13px 31px rgba(255, 255, 255, 0.041);
+	transform: translate3d(0, -2px, 0) scale(1.12);
 }
-.neu-button-round:hover::before { opacity: 1; }
 
 .neu-button-round:active {
-  transform: translateY(2px) scale(0.95);
-  box-shadow: none;
-  transition-duration: 0.7s;
+	background: #121212;
+	box-shadow:
+		inset 9px 10px 20px rgba(0, 0, 0, 0.7),
+		inset -8px -8px 18px rgba(255, 255, 255, 0.028);
+	transform: translate3d(0, 2px, 0) scale(0.82);
+	transition-duration: 50ms;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.9, 0.4);
 }
-.neu-button-round:active::before {
-  opacity: 0;
-  transition-duration: 0.2s;
+
+.neu-button > svg,
+.neu-button-round > svg {
+	transition: transform 190ms cubic-bezier(0.16, 1.7, 0.3, 1);
 }
-.neu-button-round:active::after { opacity: 1; }
-.neu-button-round:focus { outline: none; }
+
+.neu-button:hover > svg {
+	transform: translate3d(1px, 0, 0) scale(1.08);
+}
+
+.neu-button-round:hover > svg {
+	transform: scale(1.1);
+}
+
+.neu-button:active > svg,
+.neu-button-round:active > svg {
+	transform: scale(0.86);
+}
+
+.neu-button.is-active {
+	background: #121212;
+	box-shadow:
+		inset 11px 12px 25px rgba(0, 0, 0, 0.68),
+		inset -9px -9px 22px rgba(255, 255, 255, 0.028);
+}
+
+.project-action-button {
+	box-shadow:
+		6px 7px 14px rgba(0, 0, 0, 0.72),
+		-5px -5px 12px rgba(255, 255, 255, 0.03);
+}
+
+.project-action-button:hover {
+	box-shadow:
+		8px 9px 17px rgba(0, 0, 0, 0.75),
+		-6px -6px 14px rgba(255, 255, 255, 0.036);
+}
+
+.project-action-button:active {
+	box-shadow:
+		inset 5px 6px 11px rgba(0, 0, 0, 0.68),
+		inset -4px -4px 9px rgba(255, 255, 255, 0.027);
+}
+
+.neu-card:hover {
+	border-color: #3b3b3b;
+	background: #1d1d1d;
+	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.6), -2px -2px 6px rgba(255, 255, 255, 0.02);
+	transform: translate3d(0, -1px, 0);
+}
+
+.neu-card-interactive:active {
+	background: #101010;
+	box-shadow: inset 4px 4px 9px rgba(0, 0, 0, 0.68), inset -2px -2px 5px rgba(255, 255, 255, 0.02);
+	transform: translate3d(0, 1px, 0) scale(0.985);
+	transition-duration: 65ms;
+}
+
+.neu-button:disabled:hover,
+.neu-button-round:disabled:hover {
+	border-color: #292929;
+	background: #191919;
+	box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.58), -2px -2px 7px rgba(255, 255, 255, 0.025);
+	transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+	}
+}
